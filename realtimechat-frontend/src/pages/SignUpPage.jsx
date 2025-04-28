@@ -1,64 +1,94 @@
 import { useState } from "react";
-// import { useAuthStore } from "../store/useAuthStore";
-import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-react";
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  Lock,
+  Mail,
+  MessageSquare,
+  User,
+} from "lucide-react";
 import { Link } from "react-router-dom";
-
 import AuthImagePattern from "../components/AuthImagePattern";
 import toast from "react-hot-toast";
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: "",
+    username: "",
     email: "",
     password: "",
   });
 
-  // const { signup, isSigningUp } = useAuthStore();
-  const signup = false
-  const isSigningUp = false
+  const signup = async (data) => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/auth/users/register",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...data, status: "PENDING_VERIFICATION" }),
+        }
+      );
+
+      if (response.ok) {
+        toast.success(
+          "Account created successfully! Please verify your email."
+        );
+        // Optional: redirect to login page
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.message || "Signup failed");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong");
+    }
+  };
+
+  const isSigningUp = false; // You can later manage loading state properly
 
   const validateForm = () => {
-    if (!formData.fullName.trim()) return toast.error("Full name is required");
+    if (!formData.username.trim()) return toast.error("Username is required");
     if (!formData.email.trim()) return toast.error("Email is required");
-    if (!/\S+@\S+\.\S+/.test(formData.email)) return toast.error("Invalid email format");
+    if (!/\S+@\S+\.\S+/.test(formData.email))
+      return toast.error("Invalid email format");
     if (!formData.password) return toast.error("Password is required");
-    if (formData.password.length < 6) return toast.error("Password must be at least 6 characters");
+    if (formData.password.length < 6)
+      return toast.error("Password must be at least 6 characters");
 
     return true;
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
     const success = validateForm();
-
     if (success === true) signup(formData);
   };
 
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
-      {/* left side */}
+      {/* Left side */}
       <div className="flex flex-col justify-center items-center p-6 sm:p-12">
         <div className="w-full max-w-md space-y-8">
-          {/* LOGO */}
+          {/* Logo */}
           <div className="text-center mb-8">
             <div className="flex flex-col items-center gap-2 group">
-              <div
-                className="size-12 rounded-xl bg-primary/10 flex items-center justify-center 
-              group-hover:bg-primary/20 transition-colors"
-              >
+              <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <MessageSquare className="size-6 text-primary" />
               </div>
               <h1 className="text-2xl font-bold mt-2">Create Account</h1>
-              <p className="text-base-content/60">Get started with your free account</p>
+              <p className="text-base-content/60">
+                Get started with your free account
+              </p>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Username */}
             <div className="form-control">
               <label className="label">
-                <span className="label-text font-medium">Full Name</span>
+                <span className="label-text font-medium">Username</span>
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -66,14 +96,17 @@ const SignUpPage = () => {
                 </div>
                 <input
                   type="text"
-                  className={`input input-bordered w-full pl-10`}
-                  placeholder="John Doe"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  className="input input-bordered w-full pl-10"
+                  placeholder="him_rane"
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
                 />
               </div>
             </div>
 
+            {/* Email */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Email</span>
@@ -84,14 +117,17 @@ const SignUpPage = () => {
                 </div>
                 <input
                   type="email"
-                  className={`input input-bordered w-full pl-10`}
-                  placeholder="you@example.com"
+                  className="input input-bordered w-full pl-10"
+                  placeholder="him@example.com"
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, email: e.target.value })
+                  }
                 />
               </div>
             </div>
 
+            {/* Password */}
             <div className="form-control">
               <label className="label">
                 <span className="label-text font-medium">Password</span>
@@ -102,10 +138,12 @@ const SignUpPage = () => {
                 </div>
                 <input
                   type={showPassword ? "text" : "password"}
-                  className={`input input-bordered w-full pl-10`}
+                  className="input input-bordered w-full pl-10"
                   placeholder="••••••••"
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, password: e.target.value })
+                  }
                 />
                 <button
                   type="button"
@@ -121,7 +159,11 @@ const SignUpPage = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn btn-primary w-full" disabled={isSigningUp}>
+            <button
+              type="submit"
+              className="btn btn-primary w-full"
+              disabled={isSigningUp}
+            >
               {isSigningUp ? (
                 <>
                   <Loader2 className="size-5 animate-spin" />
@@ -144,8 +186,7 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      {/* right side */}
-
+      {/* Right side */}
       <AuthImagePattern
         title="Join our community"
         subtitle="Connect with friends, share moments, and stay in touch with your loved ones."
@@ -153,4 +194,5 @@ const SignUpPage = () => {
     </div>
   );
 };
+
 export default SignUpPage;
